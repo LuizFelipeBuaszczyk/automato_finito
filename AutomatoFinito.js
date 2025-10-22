@@ -33,12 +33,12 @@ export async function generateFiniteAutomata(word) {
         else{
 
             if(!(char in rules)){
-                rules[char] = stateQ.length + 1;
+                rules[char] = stateQ.length;
                 stateQ[posStateQ] = rules;
-                posStateQ = stateQ.length + 1
+                posStateQ = stateQ.length;
             }
             else{
-                posStateQ++;
+                posStateQ = rules[char];
             }
         }
         if (nextChar == "EPSILON"){
