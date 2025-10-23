@@ -46,11 +46,13 @@ export async function generateFiniteAutomata(word) {
         }
 
     }
-    
-    console.log(stateQ)
-        
+            
 }
 
 export async function resetStateQ() {
     stateQ = [];
+}
+
+export function getAutomata() {
+    return stateQ;
 }

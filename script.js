@@ -1,4 +1,4 @@
-import { generateFiniteAutomata, resetStateQ } from "./AutomatoFinito.js";
+import { generateFiniteAutomata, resetStateQ, getAutomata } from "./AutomatoFinito.js";
 
 document
   .getElementById("bt-insert-word")
@@ -69,10 +69,63 @@ function rebuildAutomata() {
   for (const w of currentWords) {
     generateFiniteAutomata(w);
   }
+  createTableAutomata();
 }
 
 function btResetAutomataLanguage() {
   resetStateQ();
   wordList.innerHTML = "";
   currentWords = [];
+}
+
+// Cria a tabela para visualização do automato
+function createTableAutomata(){
+  const alphabet = Array.from({length: 27}, (_, i) => String.fromCharCode(97 + i));
+  alphabet[26] = "EPSILON";
+  const table = document.getElementById('table-automata');
+  table.replaceChildren();
+
+  // Adicionando o cabeçalho
+  const thead = document.createElement("thead")
+  const headerRow = document.createElement("tr");
+
+  const qX = document.createElement("th");
+  qX.textContent = "qX";
+  headerRow.appendChild(qX);
+
+  // Adicionando o alfabeto
+  alphabet.forEach(letter => {
+    const th = document.createElement("th");
+    th.textContent = letter;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Dados da tabela
+  const automata = getAutomata();
+
+  const tbody = document.createElement("tbody");
+
+  for (let i = 0; i < automata.length; i++) {
+    const ruleState = automata[i]
+    const row = document.createElement("tr");
+    const tdQX = document.createElement("td");
+    tdQX.textContent = `q${i}`
+    row.appendChild(tdQX);
+
+    alphabet.forEach(letter => {
+      const td = document.createElement("td");
+
+      const nextState = letter == "EPSILON" ? "X" : `q${ruleState[letter]}`;
+      const fieldValue = (letter in ruleState) ?  nextState : '-';
+      
+      td.textContent = fieldValue;
+      row.appendChild(td);
+    });
+
+    tbody.appendChild(row);
+  }
+  table.appendChild(tbody);
+  
 }
