@@ -1,4 +1,4 @@
-import { generateFiniteAutomata, resetStateQ, getAutomata } from "./AutomatoFinito.js";
+import { generateFiniteAutomata, resetStateQ, getAutomata, validateSentence } from "./AutomatoFinito.js";
 
 document
   .getElementById("bt-insert-word")
@@ -6,6 +6,11 @@ document
 document
   .getElementById("bt-reset-language")
   .addEventListener("click", btResetAutomataLanguage);
+
+document
+  .getElementById("tx-word-to-valide")
+  .addEventListener("input", txInputLetter)
+
 
 const wordList = document.getElementById("word-list");
 
@@ -74,6 +79,7 @@ function rebuildAutomata() {
 
 function btResetAutomataLanguage() {
   resetStateQ();
+  createTableAutomata();
   wordList.innerHTML = "";
   currentWords = [];
 }
@@ -128,4 +134,17 @@ function createTableAutomata(){
   }
   table.appendChild(tbody);
   
+}
+
+
+function txInputLetter(){
+  const word = document.getElementById("tx-word-to-valide").value;
+  const lastLetter = word[word.length-1];
+
+  if (lastLetter == " "){
+    const isSetenceValid = validateSentence(word);
+    console.log(isSetenceValid)
+    document.getElementById("tx-word-to-valide").value = "";
+  }
+
 }

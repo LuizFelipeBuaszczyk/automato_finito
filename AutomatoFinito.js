@@ -9,7 +9,6 @@ export async function generateFiniteAutomata(word) {
     for (let i = 0; i < word.length; i++) {
         let char = word[i];
         let nextChar = word.length - 1 == i ? "EPSILON" : word[i+1];
-        console.log(char, posStateQ)
 
         // Se o autômato ainda está vazio, cria o primeiro estado
         if (stateQ.length == 0) {
@@ -55,4 +54,19 @@ export async function resetStateQ() {
 
 export function getAutomata() {
     return stateQ;
+}
+
+export function validateSentence(sentence){
+    if (stateQ.length == 0) return false;
+    let q = 0;
+
+    for(let i=0; i<sentence.length; i++){
+        const symbol = sentence[i] == " " ? "EPSILON" : sentence[i];
+        const rules = stateQ[q];
+
+        if (!(symbol in rules)) return false;
+
+        q = rules[symbol];
+    }
+    return true;
 }
