@@ -1,4 +1,10 @@
-import { generateFiniteAutomata, resetStateQ, getAutomata, validateSentence } from "./AutomatoFinito.js";
+import {
+  generateFiniteAutomata,
+  resetStateQ,
+  getAutomata,
+  validatePrefix,
+  validateWord,
+} from "./AutomatoFinito.js";
 
 document
   .getElementById("bt-insert-word")
@@ -9,8 +15,7 @@ document
 
 document
   .getElementById("tx-word-to-valide")
-  .addEventListener("input", txInputLetter)
-
+  .addEventListener("input", txInputLetter);
 
 const wordList = document.getElementById("word-list");
 
@@ -82,17 +87,22 @@ function btResetAutomataLanguage() {
   createTableAutomata();
   wordList.innerHTML = "";
   currentWords = [];
+  const inputElement = document.getElementById("tx-word-to-valide");
+  inputElement.value = "";
+  inputElement.classList.remove("valid", "invalid");
 }
 
 // Cria a tabela para visualização do automato
-function createTableAutomata(){
-  const alphabet = Array.from({length: 27}, (_, i) => String.fromCharCode(97 + i));
+function createTableAutomata() {
+  const alphabet = Array.from({ length: 27 }, (_, i) =>
+    String.fromCharCode(97 + i)
+  );
   alphabet[26] = "EPSILON";
-  const table = document.getElementById('table-automata');
+  const table = document.getElementById("table-automata");
   table.replaceChildren();
 
   // Adicionando o cabeçalho
-  const thead = document.createElement("thead")
+  const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
 
   const qX = document.createElement("th");
@@ -100,7 +110,7 @@ function createTableAutomata(){
   headerRow.appendChild(qX);
 
   // Adicionando o alfabeto
-  alphabet.forEach(letter => {
+  alphabet.forEach((letter) => {
     const th = document.createElement("th");
     th.textContent = letter;
     headerRow.appendChild(th);
@@ -114,37 +124,81 @@ function createTableAutomata(){
   const tbody = document.createElement("tbody");
 
   for (let i = 0; i < automata.length; i++) {
-    const ruleState = automata[i]
+    const ruleState = automata[i];
     const row = document.createElement("tr");
     const tdQX = document.createElement("td");
-    tdQX.textContent = `q${i}`
+    tdQX.textContent = `q${i}`;
     row.appendChild(tdQX);
 
-    alphabet.forEach(letter => {
+    alphabet.forEach((letter) => {
       const td = document.createElement("td");
 
-      const nextState = letter == "EPSILON" ? "X" : `q${ruleState[letter]}`;
-      const fieldValue = (letter in ruleState) ?  nextState : '-';
-      
-      td.textContent = fieldValue;
+      const isEpsilonTransition = letter === "EPSILON" && letter in ruleState;
+      const nextState = isEpsilonTransition
+        ? "X"
+        : letter in ruleState
+        ? `q${ruleState[letter]}`
+        : "-";
+
+      td.textContent = nextState;
       row.appendChild(td);
     });
 
     tbody.appendChild(row);
   }
   table.appendChild(tbody);
-  
+
+  highlightActiveState(0);
 }
 
+function highlightActiveState(stateIndex) {
+  const tableBody = document.querySelector("#table-automata tbody");
+  if (!tableBody) return;
 
-function txInputLetter(){
-  const word = document.getElementById("tx-word-to-valide").value;
-  const lastLetter = word[word.length-1];
+  const rows = tableBody.querySelectorAll("tr");
+  rows.forEach((row) => row.classList.remove("active-state"));
 
-  if (lastLetter == " "){
-    const isSetenceValid = validateSentence(word);
-    console.log(isSetenceValid)
-    document.getElementById("tx-word-to-valide").value = "";
+  if (stateIndex >= 0 && stateIndex < rows.length) {
+    rows[stateIndex].classList.add("active-state");
   }
+}
 
+function txInputLetter() {
+  const inputElement = document.getElementById("tx-word-to-valide");
+  const word = inputElement.value;
+  const lastLetter = word[word.length - 1];
+
+  if (lastLetter == " ") {
+    const wordToValidate = word.trim();
+    const isValid = validateWord(wordToValidate);
+
+    inputElement.classList.remove("valid", "invalid");
+    inputElement.classList.add(isValid ? "valid" : "invalid");
+
+    setTimeout(() => {
+      inputElement.value = "";
+      inputElement.classList.remove("valid", "invalid");
+      highlightActiveState(0);
+    }, 500);
+  } else {
+    const result = validatePrefix(word);
+
+    highlightActiveState(result.q);
+
+    if (word.length === 0) {
+      inputElement.classList.remove("valid", "invalid");
+      highlightActiveState(0);
+    } else if (result.valid) {
+      inputElement.classList.remove("invalid");
+
+      if (validateWord(word)) {
+        inputElement.classList.add("valid");
+      } else {
+        inputElement.classList.remove("valid");
+      }
+    } else {
+      inputElement.classList.add("invalid");
+      inputElement.classList.remove("valid");
+    }
+  }
 }
