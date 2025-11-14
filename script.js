@@ -24,7 +24,13 @@ let currentWords = [];
 
 function btInsertWord() {
   const txWord = document.getElementById("tx-word");
-  const word = txWord.value;
+  const word = txWord.value.toLowerCase();
+  const regexInput = /^[a-z]+$/;
+  
+  if (!regexInput.test(word)){
+    alert("A palavra deve conter apenas caracteres de a-z");
+    return;
+  } 
 
   if (!word || word.trim() === "") {
     alert("Por favor, digite uma palavra.");
